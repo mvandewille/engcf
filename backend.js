@@ -1,10 +1,11 @@
 
 var shifts;
+var done;
 
 //Function goes row by row and adds valid shifts to an array of Shift objects
 function populate()
 {
-         //Reference the FileUpload element.
+        //Reference the FileUpload element.
         var fileUpload = document.getElementById("fileUpload");
  
         //Validate whether File is valid Excel file.
@@ -33,12 +34,14 @@ function populate()
                 }
             } else {
                 alert("This browser does not support HTML5.");
+                return;
             }
         } else {
             alert("Please upload a valid Excel file.");
+            return;
         }
-        window.location = "IDscanner2.html"
-    };
+        window.location = "IDscanner.html"
+};
 
 function ProcessExcel(data) {
     //Read the Excel File data.
@@ -56,6 +59,7 @@ function ProcessExcel(data) {
 //Main method to call each helper method.
 function main()
 {
+    done = false;
     shifts = JSON.parse(window.localStorage.getItem("shiftArr"));
     var userID = get_ID();
     if (!userID)
@@ -74,7 +78,8 @@ function main()
         alert("No shifts available to check in!");
         return true;
     }
-    display_shifts(checked, totalUserShifts), 5000;
+    display_shifts(checked, totalUserShifts);
+    var int = setTimeout(function() { window.location = "IDscanner.html" }, 5000);
     return false;
 }
 
@@ -197,19 +202,17 @@ function check_in(shiftArr)
 //Function to display checked-in shifts as HTML elements
 function display_shifts(currentShifts, totalShifts)
 {
+    var welcomeMsg = document.createElement("welcome");
+    welcomeMsg.innerHTML = "Welcome " + currentShifts[0]["Employee"] + ", you are successfully checked in to the following shifts: ";
+    document.getElementById("dvSchedule").appendChild(welcomeMsg);
     for (var i = 0; i < currentShifts.length; i++)
     {
         var newElement = document.createElement("P");
-        if (i == 0)
-        {
-            var ambassadorWelcome = "Welcome " + currentShifts[0]["Employee"] + ", you are successfully checked in to the following shifts: ";
-            newElement.innerHTML = ambassadorWelcome;
-        }
         newElement.innerHTML = currentShifts[i]["Start"] + " | " + currentShifts[i]["Position"] + " | " + currentShifts[i]["Site"];
         document.getElementById("dvSchedule").appendChild(newElement);
     }
-    var accept = document.createElement("button");
-    accept.innerHTML = "OK";
-    accept.onclick = "clearInterval()";
-    document.getElementById("dvSchedule").appendChild(accept);
+    // var accept = document.createElement("button");
+    // accept.innerHTML = "OK";
+    // accept.onclick = "clearInterval()";
+    // document.getElementById("dvSchedule").appendChild(accept);
 }

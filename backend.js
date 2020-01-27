@@ -13,7 +13,6 @@ function populate()
         if (regex.test(fileUpload.value.toLowerCase())) {
             if (typeof (FileReader) != "undefined") {
                 var reader = new FileReader();
- 
                 //For Browsers other than IE.
                 if (reader.readAsBinaryString) {
                     reader.onload = function (e) {
@@ -40,14 +39,16 @@ function populate()
             alert("Please upload a valid Excel file.");
             return;
         }
-        window.location = "IDscanner.html"
+        document.getElementById("fileUpload").style.visibility = "hidden";
+        document.getElementById("upload").style.visibility = "hidden";
+        document.getElementById("dvForm").style.visibility = "visible";
 };
 
 function ProcessExcel(data) {
     //Read the Excel File data.
     var workbook = XLSX.read(data, {type: 'binary'});
  
-    //Fetch the name of First Sheet.
+    //Fetch the name of second Sheet.
     var secondSheet = workbook.SheetNames[1];
  
     //Read all rows from First Sheet into an JSON array.
@@ -64,22 +65,39 @@ function main()
     var userID = get_ID();
     if (!userID)
     {
-        return true;
+        document.getElementById("IDswipeform").reset();
+        document.getElementById("dvSchedule").innerHTML = "";
     }
-    var totalUserShifts = get_shifts(userID);
-    if (totalUserShifts.length == 0)
+    else
     {
-        alert("No shifts found");
-        return true;
+            var totalUserShifts = get_shifts(userID);
+        if (totalUserShifts.length == 0)
+        {
+            alert("No shifts found!");
+            document.getElementById("IDswipeform").reset();
+            document.getElementById("dvSchedule").innerHTML = "";
+        }
+        else
+        {
+            var checked = check_in(totalUserShifts);
+            if (checked.length == 0)
+            {
+                alert("No shifts available to check in!");
+                return true;
+            }
+            for (var i = 0; i < checked.length; i++)
+            {
+                write_shifts(shifts.indexOf(checked[i]) + 2);
+            }
+            display_shifts(checked, totalUserShifts);
+        }
     }
-    var checked = check_in(totalUserShifts);
-    if (checked.length == 0)
+
+    var int = setTimeout(function() 
     {
-        alert("No shifts available to check in!");
-        return true;
-    }
-    display_shifts(checked, totalUserShifts);
-    var int = setTimeout(function() { window.location = "IDscanner.html" }, 5000);
+        document.getElementById("IDswipeform").reset();
+        document.getElementById("dvSchedule").innerHTML = "";
+    }, 5000);
     return false;
 }
 
@@ -196,7 +214,18 @@ function check_in(shiftArr)
             }
         }
     }
+    for (var i = 0; i < curShifts.length; i++)
+    {
+        for (var j = 0; j < shifts.length; j++)
+        {
+            if (curShifts[i] == shifts[j])
+            {
+                check_in(j + 2);
+            }
+        }
+    }
     return curShifts;
+
 }
 
 //Function to display checked-in shifts as HTML elements
@@ -215,4 +244,26 @@ function display_shifts(currentShifts, totalShifts)
     // accept.innerHTML = "OK";
     // accept.onclick = "clearInterval()";
     // document.getElementById("dvSchedule").appendChild(accept);
+}
+
+function write_shifts(numRow)
+{
+    var fileUpload = document.getElementById("fileUpload");
+    var reader = new FileReader();
+    reader.onload = function(e)
+    {
+        var data = e.target.result;
+        data = new Uint8Array(data);
+        process_wb(XLSX.read(data, {bookType:'xlsx', bookSST:false, type:'array'}));
+    }
+}
+
+function process_wb(wb)
+{
+    var ws = wb.Sheets[wb.SheetNames[1]]
+    var cellLocation = "N" + numRow;
+    if(!ws[cellLocation]) ws[cellLocation] = {};
+    ws[cellLocation].t = "s";
+    ws[cellLocation].t = "Checked in";
+    XLSX.writeFile(wb, )
 }

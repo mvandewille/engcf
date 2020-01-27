@@ -6,5 +6,29 @@
 
     <input type="file" id="fileUpload" />
     <input type="button" id="upload" value="Upload" onclick="populate()" />
-    
+
+    <div id ="dvForm">
+    		<br>
+		<h1 align="center" style="color:red;font-size:40pt">
+			Ambassador Check-In
+		</h1>
+		<br>
+		<form id="IDswipeform" align="center" onsubmit="return main()">
+			<fieldset>
+				<h2 align="center" style="color:black;font-size:20pt">
+					Please enter or swipe your ISU ID
+				</h2>
+			
+				<p id = IDbox>
+					<input align="center;" autofocus="autofocus" style="height:50px;font-size:14pt;width:400px;text-align:center" id="IDbox" name="IDbox" />
+				</p>
+			
+				<input align="center" type="submit" id="submitBtn" name="Submit Button" value="Submit"/>
+			</fieldset>
+		</form>
+		<br>
+		<br>
+		<hr />
+    </div>
+    <div id="dvSchedule"></div>
 </body>

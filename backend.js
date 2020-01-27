@@ -249,21 +249,23 @@ function display_shifts(currentShifts, totalShifts)
 function write_shifts(numRow)
 {
     var fileUpload = document.getElementById("fileUpload");
-    var reader = new FileReader();
+    var reader = new FileReader(fileUpload.value.toLowerCase());
     reader.onload = function(e)
     {
         var data = e.target.result;
         data = new Uint8Array(data);
-        process_wb(XLSX.read(data, {bookType:'xlsx', bookSST:false, type:'array'}));
+        process_wb(XLSX.read(data, {bookType:'xlsx', bookSST:false, type:'array'}), numRow);
     }
+    reader.readAsArrayBuffer(fileUpload.files[0]);
 }
 
-function process_wb(wb)
+function process_wb(wb, num)
 {
+    var fileUpload = document.getElementById("fileUpload");
     var ws = wb.Sheets[wb.SheetNames[1]]
-    var cellLocation = "N" + numRow;
+    var cellLocation = "N" + num;
     if(!ws[cellLocation]) ws[cellLocation] = {};
     ws[cellLocation].t = "s";
     ws[cellLocation].t = "Checked in";
-    XLSX.writeFile(wb, )
+    XLSX.writeFile(wb, fileUpload.value.toLowerCase())
 }

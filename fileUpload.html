@@ -1,21 +1,44 @@
-<script src="./backend.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.13.5/xlsx.full.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.13.5/jszip.js"></script>
 
+<head>
+	<style>
+		input[type="submit"]
+		{
+			background: red;
+			color: white;
+			border-style: solid;
+			border-color: red;
+			height: 50px;
+			width: 100px;
+			font: bold 15px arial,sans-serif;
+			text-shadow: none;
+		}
+	</style>
+	<script src="./backend.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.13.5/xlsx.full.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.13.5/jszip.js"></script>
+</head>
+	
 <body>
-
-    <input type="file" id="fileUpload" />
-    <input type="button" id="upload" value="Upload" onclick="populate()" />
+	<div id ="uploader" style="background:yellow">
+		<br>
+		<br>
+		<br>
+    	<input type="file" id="fileUpload" />
+    	<input type="button" id="upload" value="Upload" onclick="populate()" />
+    	<br>
+    	<br>
+    	<br>
+    </div>
 
     <div id ="dvForm">
-    		<br>
-		<h1 align="center" style="color:red;font-size:40pt">
+    	<br>
+		<h1 align="center" style="color:red;font-size:40pt;font-family:arial">
 			Ambassador Check-In
 		</h1>
 		<br>
 		<form id="IDswipeform" align="center" onsubmit="return main()">
 			<fieldset>
-				<h2 align="center" style="color:black;font-size:20pt">
+				<h2 align="center" style="color:black;font-size:20pt;font-family:arial">
 					Please enter or swipe your ISU ID
 				</h2>
 			
@@ -31,4 +54,7 @@
 		<hr />
     </div>
     <div id="dvSchedule"></div>
+    <div style="position:fixed; width:100%; bottom:0px; ">
+    	<input type="button" id="tester" value="Export" onclick="write_shifts()" />
+    </div>
 </body>

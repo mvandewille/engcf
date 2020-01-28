@@ -1,6 +1,15 @@
 
 var shifts;
+var checked_shifts = [];
 var done;
+
+window.onbeforeunload = confirmExit;
+
+function confirmExit()
+{
+    write_shifts();
+    return "Whatever this is dumb";
+}
 
 //Function goes row by row and adds valid shifts to an array of Shift objects
 function populate()
@@ -39,8 +48,7 @@ function populate()
             alert("Please upload a valid Excel file.");
             return;
         }
-        document.getElementById("fileUpload").style.visibility = "hidden";
-        document.getElementById("upload").style.visibility = "hidden";
+        document.getElementById("uploader").style.visibility = "hidden";
         document.getElementById("dvForm").style.visibility = "visible";
 };
 
@@ -76,6 +84,7 @@ function main()
             alert("No shifts found!");
             document.getElementById("IDswipeform").reset();
             document.getElementById("dvSchedule").innerHTML = "";
+            return false;
         }
         else
         {
@@ -83,21 +92,25 @@ function main()
             if (checked.length == 0)
             {
                 alert("No shifts available to check in!");
-                return true;
+                document.getElementById("IDswipeform").reset();
+                document.getElementById("dvSchedule").innerHTML = "";
+                return false;
             }
             for (var i = 0; i < checked.length; i++)
             {
-                write_shifts(shifts.indexOf(checked[i]) + 2);
+                if(checked_shifts.indexOf(checked[i]) == -1)
+                {
+                    checked_shifts.push(checked[i]);
+                }
             }
             display_shifts(checked, totalUserShifts);
+            var int = setTimeout(function() 
+            {
+                document.getElementById("IDswipeform").reset();
+                document.getElementById("dvSchedule").innerHTML = "";
+            }, 5000);
         }
     }
-
-    var int = setTimeout(function() 
-    {
-        document.getElementById("IDswipeform").reset();
-        document.getElementById("dvSchedule").innerHTML = "";
-    }, 5000);
     return false;
 }
 
@@ -214,16 +227,6 @@ function check_in(shiftArr)
             }
         }
     }
-    for (var i = 0; i < curShifts.length; i++)
-    {
-        for (var j = 0; j < shifts.length; j++)
-        {
-            if (curShifts[i] == shifts[j])
-            {
-                check_in(j + 2);
-            }
-        }
-    }
     return curShifts;
 
 }
@@ -240,13 +243,9 @@ function display_shifts(currentShifts, totalShifts)
         newElement.innerHTML = currentShifts[i]["Start"] + " | " + currentShifts[i]["Position"] + " | " + currentShifts[i]["Site"];
         document.getElementById("dvSchedule").appendChild(newElement);
     }
-    // var accept = document.createElement("button");
-    // accept.innerHTML = "OK";
-    // accept.onclick = "clearInterval()";
-    // document.getElementById("dvSchedule").appendChild(accept);
 }
 
-function write_shifts(numRow)
+function write_shifts()
 {
     var fileUpload = document.getElementById("fileUpload");
     var reader = new FileReader(fileUpload.value.toLowerCase());
@@ -254,18 +253,22 @@ function write_shifts(numRow)
     {
         var data = e.target.result;
         data = new Uint8Array(data);
-        process_wb(XLSX.read(data, {bookType:'xlsx', bookSST:false, type:'array'}), numRow);
+        process_wb(XLSX.read(data, {bookType:'xlsx', bookSST:false, type:'array'}));
     }
     reader.readAsArrayBuffer(fileUpload.files[0]);
 }
 
-function process_wb(wb, num)
+function process_wb(wb)
 {
     var fileUpload = document.getElementById("fileUpload");
     var ws = wb.Sheets[wb.SheetNames[1]]
-    var cellLocation = "N" + num;
-    if(!ws[cellLocation]) ws[cellLocation] = {};
-    ws[cellLocation].t = "s";
-    ws[cellLocation].t = "Checked in";
-    XLSX.writeFile(wb, fileUpload.value.toLowerCase())
+    for (var i = 0; i < checked_shifts.length; i++)
+    {
+        var num = shifts.indexOf(checked_shifts[i]) + 2;
+        var cellLocation = "N" + num;
+        if(!ws[cellLocation]) ws[cellLocation] = {};
+        ws[cellLocation].t = "s";
+        ws[cellLocation].v = "Checked in";
+    }
+    XLSX.writeFile(wb, 'days_results.xlsx')
 }

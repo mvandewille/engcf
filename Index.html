@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <title>
+          ECF Check-in
+      </title>
+      <style>
+          input[type="submit"]
+          {
+              border-radius: 3px;
+              background: red;
+              color: white;
+              border-style: solid;
+              border-color: red;
+              height: 40px;
+              width: 80px;
+              font: bold 17px arial,sans-serif;
+              text-shadow: none;
+          }
+      </style>
+      <script>
+          function checkIn() {
+            Logger.log('Called from html instead');
+            google.script.run.performCheckIn();
+            return false;
+          }
+      </script>
+  </head>
+  <body>
+      <div id ="dvForm">
+          <form id="IDswipeform" align="center" onsubmit="return checkIn()">
+              <fieldset>
+                  <h3 align="center" style="color:black;font-size:19pt;font-family:arial">
+                      Please enter or swipe your ISU ID
+                  </h3>
+                  <p id = IDbox>
+                      <input align="center;" autofocus="autofocus" style="height:35px;font-size:16pt;width:400px;text-align:center" id="IDbox" name="IDbox" />
+                  </p>
+                  <input align="center" type="submit" id="submitBtn" name="Submit Button" value="Submit"/>
+              </fieldset>
+          </form>
+      </div>
+  </body>
+</html>

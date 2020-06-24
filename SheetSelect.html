@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <base target="_top">
+      <style>
+          button
+          {
+              border-radius: 3px;
+              background: #C8102E;
+              color: #F1BE48;
+              border-style: solid;
+              border-color: #C8102E;
+              height: 40px;
+              font: bold 17px arial,sans-serif;
+              text-shadow: none;
+          }
+      </style>
+      
+      <script>
+         function selectSheet(id) {
+              var idStr = id.toString()
+              google.script.run.setProperty(idStr);
+              google.script.run.openSwipeWindow();
+         }
+         
+         function closeProgram() {
+             google.script.host.close()
+         }
+      </script>
+  </head>
+  <body>
+    <? if (data.length == 0) { ?>
+           <p style="color:black;font-size:16pt;font-family:arial">There are no available sheets to select!</p>
+           <br>
+           <button id="close" onClick="closeProgram()">Close</button>
+    <? } ?>
+    <? for (var i = 0; i < data.length; i++) { ?>
+      <button id="blank" onClick="selectSheet(this.id)"><?= data[i]?></button>
+      <br>
+      <br>
+    <? } ?>
+  </body>
+</html>
+
+

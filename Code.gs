@@ -141,15 +141,7 @@ function generatePivot() {
     hourly_sheet.insertColumnBefore(2)
     var IDrange = hourly_sheet.getRange(1, 2, hourly_sheet.getLastRow())
     hourly_sheet.hideColumn(IDrange)
-    for (var i = 1; i <= hourly_sheet.getLastRow(); i++) {
-        var cell = hourly_sheet.getRange(i, 2);
-        if (i == 1){
-            cell.setValue("ID Number");
-        }
-        else {
-            cell.setFormula("=INDEX('WhenIWork Export'!C:C, MATCH(A" + i + ", 'WhenIWork Export'!B:B, 0))")
-        }
-    }
+    hourly_sheet.getRange(2, 2, hourly_sheet.getLastRow(), 1).setFormula("=INDEX('WhenIWork Export'!C:C, MATCH(INDIRECT(\"R[0]C[-1]\", false), 'WhenIWork Export'!B:B, 0))")
 }
 
 function openSheetSelector() {
@@ -222,6 +214,7 @@ function performCheckIn(studentID) {
     var IDrange = sheet.getRange(2, 2, sheet.getLastRow()).getValues()
     var row = IDrange.findIndex(testMatch)
     
+    const dateFormat = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', day: '2-digit' })
     if (row != -1) {
         ambassador = new Ambassador(sheet.getRange(row + 2, 1), row + 2)
         var shiftRangeValues = sheet.getRange(row + 2, 3, 1, sheet.getLastColumn()).getValues()
@@ -229,11 +222,17 @@ function performCheckIn(studentID) {
             if (shiftRangeValues[i] == "") {
                 continue;
             }
-            var shift_time = sheet.getRange(1, i + 3).getValue()
+            var shift_time = sheet.getRange(1, i + 3).getDisplayValue()
+            
             var shift_hour = shift_time.toString().split(":")[0]
             var shift_mins = shift_time.toString().split(":")[1]
+            if (shift_hour.indexOf("PM") != -1) {
+                shift_hour += 12
+            }
             
-//            if (shift_hour - hour <= 1 && 
+            if ((shift_hour - hour <= 1 || (shift_hour == 0 && hour == 23))) {
+            
+            }
             
             
             //FIND FIRST SHIFT AVAILABLE TO CHECK IN

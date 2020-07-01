@@ -45,6 +45,19 @@ function fullReset() {
     }
 }
 
+function stringToColor(str) {
+  var hash = 0;
+  for (var i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  var colour = '#';
+  for (var i = 0; i < 3; i++) {
+    var value = (hash >> (i * 8)) & 0xFF;
+    colour += ('00' + value.toString(16)).substr(-2);
+  }
+  return colour;
+}
+
 function generatePivot() {
     //ask user what the new sheet name should be
     var ui = SpreadsheetApp.getUi();
@@ -107,6 +120,7 @@ function generatePivot() {
     if (hourly_sheet != null) {
       ss.deleteSheet(hourly_sheet);
     }
+    var sheetColor = stringToColor(new_sheet_name)
     hourly_sheet = ss.insertSheet(new_sheet_name);
     hourly_sheet.activate();
     hourly_sheet.getRange(1, 1, pivot_sheet.getLastRow(), pivot_sheet.getLastColumn()).setValues(pivotRange.getValues());
@@ -141,7 +155,9 @@ function generatePivot() {
     hourly_sheet.insertColumnBefore(2)
     var IDrange = hourly_sheet.getRange(1, 2, hourly_sheet.getLastRow())
     hourly_sheet.hideColumn(IDrange)
-    hourly_sheet.getRange(2, 2, hourly_sheet.getLastRow(), 1).setFormula("=INDEX('WhenIWork Export'!C:C, MATCH(INDIRECT(\"R[0]C[-1]\", false), 'WhenIWork Export'!B:B, 0))")
+    hourly_sheet.getRange(2, 2, hourly_sheet.getLastRow() - 1, 1).setFormula("=INDEX('WhenIWork Export'!C:C, MATCH(INDIRECT(\"R[0]C[-1]\", false), 'WhenIWork Export'!B:B, 0))")
+    hourly_sheet.getRange(1,2).setValue("ID Number")
+    hourly_sheet.setTabColor(sheetColor)
 }
 
 function openSheetSelector() {
@@ -150,7 +166,7 @@ function openSheetSelector() {
     var sheetList = [];
     for (var i = 0; i < totalSheetList.length; i++) {
         if (totalSheetList[i].getSheetName().indexOf("_raw") == -1 && totalSheetList[i].getSheetName() != "WhenIWork Export") {
-            sheetList.push(totalSheetList[i].getSheetName())
+            sheetList.push(totalSheetList[i])
         }
     }
     var template = HtmlService.createTemplateFromFile('SheetSelect');
@@ -169,7 +185,6 @@ function openSwipeWindow() {
 function setProperty(id) {
     var cur_sheet = PropertiesService.getUserProperties()
     cur_sheet.setProperty('cur_sheet', id);
-    Logger.log(PropertiesService.getUserProperties().getProperty('cur_sheet'))
 }
 
 var Shift = function(title, time, row, column, checked) {
@@ -186,11 +201,6 @@ var Ambassador = function(name, row) {
     this.shifts = []
 }
 
-function testShifts() {
-    PropertiesService.getUserProperties().setProperty('cur_sheet', "oiweuhgf");
-    performCheckIn(490227758)
-}
-
 function performCheckIn(studentID) {
     
     function testMatch(cell_value) {
@@ -198,51 +208,60 @@ function performCheckIn(studentID) {
         var idStr = studentID.toString()
         return cellStr == idStr
     }
+    
+    var ui = SpreadsheetApp.getUi()
 
     var ambassador
     var checked_shifts = [];
     
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-//    var cur_sheet = PropertiesService.getUserProperties().getProperty('cur_sheet');
-    var sheet = ss.getSheetByName("oiweuhgf");
+    var cur_sheet = PropertiesService.getUserProperties().getProperty('cur_sheet');
+    var sheet = ss.getSheetByName(cur_sheet);
     
     var date = new Date();
-    var hour = date.getHours()
-    var minutes = date.getMinutes()
-    Logger.log(hour, minutes)
     
     var IDrange = sheet.getRange(2, 2, sheet.getLastRow()).getValues()
     var row = IDrange.findIndex(testMatch)
+    var first_shift = true
     
-    const dateFormat = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', day: '2-digit' })
     if (row != -1) {
-        ambassador = new Ambassador(sheet.getRange(row + 2, 1), row + 2)
+        ambassador = new Ambassador(sheet.getRange(row + 2, 1).getValue(), row + 2)
         var shiftRangeValues = sheet.getRange(row + 2, 3, 1, sheet.getLastColumn()).getValues()
-        for (var i = 0; i < shiftRangeValues.length; i ++) {
-            if (shiftRangeValues[i] == "") {
-                continue;
+        for (var i = 0; i < shiftRangeValues[0].length; i ++) {
+            if (shiftRangeValues[0][i] != "") {
+                var shift_time = sheet.getRange(1, i + 3).getDisplayValue()
+                var shift_hour = parseInt(shift_time.toString().split(":")[0])
+                if (shift_time.indexOf("PM") != -1 && shift_hour != 12) {
+                    shift_hour += 12
+                }
+                var shift_date = new Date(date.getFullYear(), date.getMonth(), date.getDate(), shift_hour, parseInt(shift_time.toString().split(":")[1].split(" ")[0]), 0)
+                var diff = (date - shift_date)/60000
+                if (first_shift && (diff <= 15 && diff >= -60)) {
+                    ambassador.shifts.push(new Shift(shiftRangeValues[0][i], shift_time, row + 2, i + 3, true));
+                    sheet.getRange(row + 2, i + 3).setBackground("#b7e1cd");
+                    date = shift_date;
+                    first_shift = false;
+                    i = -1;
+                    continue;
+                }
+                else if (!first_shift && (diff == -60)) {
+                    ambassador.shifts.push(new Shift(shiftRangeValues[0][i], shift_time, row + 2, i + 3, true));
+                    sheet.getRange(row + 2, i + 3).setBackground("#b7e1cd");
+                    date = shift_date;
+                    i = -1;
+                    continue;
+                }
             }
-            var shift_time = sheet.getRange(1, i + 3).getDisplayValue()
-            
-            var shift_hour = shift_time.toString().split(":")[0]
-            var shift_mins = shift_time.toString().split(":")[1]
-            if (shift_hour.indexOf("PM") != -1) {
-                shift_hour += 12
-            }
-            
-            if ((shift_hour - hour <= 1 || (shift_hour == 0 && hour == 23))) {
-            
-            }
-            
-            
-            //FIND FIRST SHIFT AVAILABLE TO CHECK IN
-            //THEN FIND ONES SUBSEQUENT TO THAT
-            /* CASES:
-                AMBASSADOR EARLY (>1 hour before shift)
-                AMBASSADOR ON TIME (<1 hour before shift)
-                AMBASSADOR LATE (>15 mins after shift)
-                ASSUME ALL SHIFTS ON THE HOUR?
-            */
         }
     }
+    var template = HtmlService.createTemplateFromFile('ShiftDisplay');
+    if (row == -1) {
+        template.found = false
+    }
+    else {
+        template.found = true
+    }
+    template.ambassador = ambassador;
+    var html = template.evaluate()
+    ui.showModalDialog(html, "Shift Display")
 }

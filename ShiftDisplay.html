@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    
+    <style>
+        p {
+            font: 17px arial,sans-serif;
+        }
+        h2 {
+            font: bold 20px arial,sans-serif;
+        }
+        .body {
+            
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th {
+            padding: 5px;
+            background-color: #C8102E;
+            font: bold 17px arial,sans-serif;
+            color: #F1BE48;
+        }
+        td {
+            padding: 5px;
+            font: 17px arial,sans-serif;
+        }
+
+    </style>
+    <script>
+        function close() {
+            setTimeout(function(){ google.script.run.openSwipeWindow(); }, 10000);
+        }
+        
+        function setWidth() {
+            var w = document.getElementById("shift_table").offsetWidth;
+            google.script.host.setWidth(w);
+            close()
+        }
+    </script>
+  </head>
+  <body onload="setWidth()">
+      <? if (found == true) { ?>
+          <h2>Welcome, <?=ambassador.name?>!</h2>
+          <br>
+          <? if (ambassador.shifts.length != 0) { ?>
+              <p>You are checked in to the following shifts:</p>
+              <table id="shift_table">
+                  <tr>
+                      <? for (var i = 0; i < ambassador.shifts.length; i++) { ?>
+                          <th><?=ambassador.shifts[i].time?></th>
+                      <? } ?>
+                  </tr>
+                  <tr>
+                      <? for (var i = 0; i < ambassador.shifts.length; i++) { ?>
+                          <td><?=ambassador.shifts[i].title?></td>
+                      <? } ?>
+                  <tr>
+              </table>
+          <? } else { ?>
+              <p>You can't check in to any of your shifts at this time.</p>
+          <? } ?>
+      <? } else { ?>
+          <p>That ID was not found.</p>
+      <? } ?>
+  </body>
+</html>
+
+

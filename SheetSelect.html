@@ -6,11 +6,21 @@
           button
           {
               border-radius: 3px;
+              border-style: none;
+              color: #FFF;
+              height: 40px;
+              font: bold 17px arial,sans-serif;
+              text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+          }
+          .close
+          {
+              border-radius: 3px;
               background: #C8102E;
               color: #F1BE48;
-              border-style: solid;
+              border-style: none;
               border-color: #C8102E;
               height: 40px;
+              width: 80px;
               font: bold 17px arial,sans-serif;
               text-shadow: none;
           }
@@ -30,12 +40,12 @@
   </head>
   <body>
     <? if (data.length == 0) { ?>
-           <p style="color:black;font-size:16pt;font-family:arial">There are no available sheets to select!</p>
+           <p style="color:black;font-size:14pt;font-family:arial">There are no available sheets to select!</p>
            <br>
-           <button id="close" onClick="closeProgram()">Close</button>
+           <button class="close" id="close" onClick="closeProgram()">Close</button>
     <? } ?>
     <? for (var i = 0; i < data.length; i++) { ?>
-      <button id="blank" onClick="selectSheet(this.id)"><?= data[i]?></button>
+      <button id="<?=data[i].getSheetName()?>" onClick="selectSheet(<?=data[i].getSheetName()?>)" style="background-color: <?=data[i].getTabColor()?>"><?=data[i].getSheetName()?></button>
       <br>
       <br>
     <? } ?>

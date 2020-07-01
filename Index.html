@@ -19,38 +19,31 @@
           }
       </style>
       <script>
-          function onSuccess(shifts) {
-              var div = document.getElementById("shifts");
-              var form = document.getElementById("dvForm");
-              form.style.display="none";
-              
-              Utilities.sleep(5);
-              google.script.host.close();
-              google.script.run.openSwipeWindow();
-          }
-      
           function checkIn() {
               var studentID;
               var input_string = document.forms["IDswipeform"]["IDbox"].value;
               if (input_string.length < 9) {
                   //TODO - WRONG ID ENTERED?
-                  document.forms["IDswipeform"]["IDbox"].value = "";
+                  document.forms["IDswipeform"]["IDbox"].value = "Invalid ID Number!";
+                  setTimeout(function(){ google.script.run.openSwipeWindow(); }, 2000);
                   return false;
               }
               else if (input_string.indexOf("=") > -1 && input_string.charAt(0) == ";") {
                   var temp = input_string.substring(7,16);
-                  document.forms["IDswipeform"]["IDbox"].value = "Accepted";
+                  document.forms["IDswipeform"]["IDbox"].value = "Processing...";
                   studentID = parseInt(temp);
               }
               else if (input_string.length == 9 && !isNaN(input_string)) {
-                  document.forms["IDswipeform"]["IDbox"].value = "Accepted";
+                  document.forms["IDswipeform"]["IDbox"].value = "Processing...";
                   studentID = input_string;
               }
               else if (input_string.length > 9) {
                   //TODO - WRONG ID ENTERED?
-                  document.forms["IDswipeform"]["IDbox"].value = "";
+                  document.forms["IDswipeform"]["IDbox"].value = "Invalid ID Number!";
+                  setTimeout(function(){ google.script.run.openSwipeWindow(); }, 2000);
                   return false;
               }
+              google.script.run.performCheckIn(studentID);
               return false;
           }
       </script>

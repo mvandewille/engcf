@@ -1,8 +1,8 @@
 // This function will create three new menu items on a new tab upon loading spreadsheet
 function onOpen() {
     SpreadsheetApp.getUi().createMenu('ECF Tools')
-      .addItem('Card Check-In', 'openSheetSelector')
       .addItem('Create Pivot', 'generatePivot')
+      .addItem('Card Check-In', 'openSheetSelector')
       .addItem('Reset Spreadsheet', 'fullReset')
       .addToUi()
      var ss = SpreadsheetApp.getActiveSpreadsheet()
@@ -176,10 +176,10 @@ function openSheetSelector() {
 }
 
 function openSwipeWindow() {
-    var html = HtmlService.createHtmlOutputFromFile('Index')
-        .setSandboxMode(HtmlService.SandboxMode.IFRAME);
-    SpreadsheetApp.getUi()
-        .showModalDialog(html, 'ECF Ambassador Check-In');
+  var ui = SpreadsheetApp.getUi()
+  var template = HtmlService.createTemplateFromFile('Index')
+  var html = template.evaluate()
+  ui.showModalDialog(html, 'ECF Ambassador Check-In');
 }
 
 function setProperty(id) {
@@ -199,6 +199,10 @@ var Ambassador = function(name, row) {
     this.name = name
     this.row = row
     this.shifts = []
+}
+
+function testShit() {
+  openSwipeWindow()
 }
 
 function performCheckIn(studentID) {
